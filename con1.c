@@ -1,5 +1,5 @@
 // Concurrency 1
-//
+// CS444 Spring2018 
 // Name: Zachary Thomas
 // Email: thomasza@oregonstate.edu
 // Date: 4/09/2018
