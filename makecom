@@ -1,1 +1,1 @@
-gcc -pthread -o con1 con1.c
+gcc -std=c99 -pthread -o con1 con1.c
