@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include "mt19937ar.h"
 #define MAX_ITEMS 32
 
 //stuct for items that threads produce and consume
@@ -27,15 +28,33 @@ int items_in_buffer = 0;
 //function prototype(s)
 void* consumer_thread();
 void* producer_thread();
-int random_range();
+int random_range(int, int);
 
 //create mutex lock
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char **argv)
 {
+	
+	//seed random number generation
+	init_genrand(time(0));
+
+	//print some random numbers:
+	int test = random_range(0, 0);
+	printf("Random number: %d\n", test);
+	test = random_range(0, 0);
+	printf("Random number: %d\n", test);
+	test = random_range(0, 0);
+	printf("Random number: %d\n", test);
+	test = random_range(0, 0);
+	printf("Random number: %d\n", test);
+	test = random_range(0, 0);
+	printf("Random number: %d\n", test);
+	test = random_range(0, 0);
+	printf("Random number: %d\n", test);
+	
 	//create multiple producer and consumer threads	
-	printf("Creating three producer and consumer threads.\n\n");
+	printf("Creating three producer and three consumer threads.\n\n");
 	pthread_t pro_t1, pro_t2, pro_t3, con_t1, con_t2, con_t3;
 	pthread_create( &pro_t1, NULL, producer_thread, NULL);
 	pthread_create( &pro_t2, NULL, producer_thread, NULL);
@@ -44,7 +63,7 @@ int main(int argc, char **argv)
 	pthread_create( &con_t2, NULL, consumer_thread, NULL); 
 	pthread_create( &con_t3, NULL, consumer_thread, NULL); 
 	
-	//join threads
+	//join threads (this should never finish)
  	pthread_join(pro_t1, NULL);
  	pthread_join(pro_t2, NULL);
  	pthread_join(pro_t3, NULL);
@@ -60,14 +79,14 @@ int main(int argc, char **argv)
 
 void* consumer_thread()
 {
-	while(true) {
-		if(items_in_buffer > 0) {
+	while(true){
+		if(items_in_buffer > 0){
 			//we get the mutex lock
 			pthread_mutex_lock(&lock);
 			printf("Consumer has mutex lock.\n");
 			//we take an item out of the buffer
 			items_in_buffer--;
-			printf("Consumer is working for %d seconds.\n", buffer[items_in_buffer].wait_period);
+			printf("Consumer is working for %d seconds to consume.\n", buffer[items_in_buffer].wait_period);
 			sleep(buffer[items_in_buffer].wait_period);
 			printf("%d\n", buffer[items_in_buffer].consumption_num);
 			printf("Consumer has removed an item.\n");
@@ -80,8 +99,8 @@ void* consumer_thread()
 
 void* producer_thread()
 {
-	while(true) {
-		if(items_in_buffer < MAX_ITEMS) {
+	while(true){
+		if(items_in_buffer < MAX_ITEMS){
 			//we get the mutex lock
 			pthread_mutex_lock(&lock);
 			printf("Producer has mutex lock.\n");
@@ -98,8 +117,9 @@ void* producer_thread()
 	}
 }
 
-int random_range()
+int random_range(int min_val, int max_val)
 {
+	unsigned int output;
 	unsigned int eax;
 	unsigned int ebx;
 	unsigned int ecx;
@@ -116,8 +136,15 @@ int random_range()
 	                     );
 	
 	if(ecx & 0x40000000){
-	//	rand(time(0)); //use rdrand
+		//use rdrand
+	__asm__ __volatile__(
+	                     "rdrand %0"
+                             :"=r" (output)
+	                     );
 	} else {
 		//use mt19937
+		output = genrand_int32();
 	}
+
+	return output;
 }
