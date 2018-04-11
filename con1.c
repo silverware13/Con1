@@ -1,5 +1,6 @@
 // Concurrency 1
-// CS444 Spring2018 
+// CS444 Spring2018
+//
 // Name: Zachary Thomas
 // Email: thomasza@oregonstate.edu
 // Date: 4/09/2018
@@ -9,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#define MAX_ITEMS 32
 
 void* consumer_thread();
 void* producer_thread();
@@ -18,23 +20,29 @@ struct item {
 	int wait_period;
 };
 
-struct buffer {
-	int max_items;
-	int index;
-	struct item* items; 
-};
-
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; // Create a mutex lock.
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; //create a mutex lock
 
 int main(int argc, char **argv)
 {
-	//this buffer holds up to 32 items.
-	struct buffer item_buffer = { 32, 0, 0};
+	//we create a buffer that holds up to 32 items
+	struct item buffer[MAX_ITEMS];
+	int items_in_buffer = 0;
 
-	//we put an item into it.
-	struct item item1;
+	//lets put some items in the buffer.
+	if(items_in_buffer < MAX_ITEMS) {
+		buffer[items_in_buffer].consumption_num = 5;
+		buffer[items_in_buffer].wait_period = 5;
+		items_in_buffer++;
+	}
+
+	//lets take some items out of the buffer.
+	if(items_in_buffer > 0) {
+		items_in_buffer--;
+		printf("%d\n",buffer[items_in_buffer].consumption_num);
+		printf("%d\n",buffer[items_in_buffer].wait_period);
+	}
 	
-	//create a producer and consumer thread.	
+	//create a producer and consumer thread	
 	printf("I am making threads\n");
 	pthread_t pro_t;
 	pthread_create( &pro_t, NULL, producer_thread, NULL); 
@@ -42,11 +50,11 @@ int main(int argc, char **argv)
 	pthread_t con_t;
 	pthread_create( &con_t, NULL, consumer_thread, NULL); 
 	
-	// Join threads.
+	//join threads
  	pthread_join(pro_t, NULL);
  	pthread_join(con_t, NULL);
 	
-	// Destroy mutex lock.	
+	//destroy mutex lock	
 	pthread_mutex_destroy(&lock);
 
 	unsigned int eax;
