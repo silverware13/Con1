@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #define MAX_ITEMS 32
 
-//stuct for items that threads produce and consume
+//struct for items that threads produce and consume
 struct item {
 	int consumption_num;
 	int wait_period;
@@ -26,6 +26,7 @@ struct item buffer[MAX_ITEMS];
 int items_in_buffer = 0;
 
 //function prototype(s)
+void spawn_threads();
 void* consumer_thread();
 void* producer_thread();
 int random_range(int, int);
@@ -38,22 +39,19 @@ int main(int argc, char **argv)
 	
 	//seed random number generation
 	init_genrand(time(NULL));
-
-	//print some random numbers:
-	int test = random_range(0, 0);
-	printf("Random number: %d\n", test);
-	test = random_range(1, 2);
-	printf("Random number: %d\n", test);
-	test = random_range(10, 20);
-	printf("Random number: %d\n", test);
-	test = random_range(30, 40);
-	printf("Random number: %d\n", test);
-	test = random_range(5, 6);
-	printf("Random number: %d\n", test);
-	test = random_range(5, 10);
-	printf("Random number: %d\n", test);
 	
-	//create multiple producer and consumer threads	
+	//create threads and wait for their completion
+	spawn_threads();
+	
+	//destroy mutex lock	
+	pthread_mutex_destroy(&lock);
+	
+	return 0;
+}
+
+void spawn_threads()
+{
+	//create three producer and three consumer threads	
 	printf("Creating three producer and three consumer threads.\n\n");
 	pthread_t pro_t1, pro_t2, pro_t3, con_t1, con_t2, con_t3;
 	pthread_create( &pro_t1, NULL, producer_thread, NULL);
@@ -70,11 +68,6 @@ int main(int argc, char **argv)
  	pthread_join(con_t1, NULL);
  	pthread_join(con_t2, NULL);
  	pthread_join(con_t3, NULL);
-	
-	//destroy mutex lock	
-	pthread_mutex_destroy(&lock);
-	
-	return 0;
 }
 
 void* consumer_thread()
@@ -84,12 +77,14 @@ void* consumer_thread()
 			//we get the mutex lock
 			pthread_mutex_lock(&lock);
 			printf("Consumer has mutex lock.\n");
-			//we take an item out of the buffer
-			items_in_buffer--;
-			printf("Consumer is working for %d seconds to consume.\n", buffer[items_in_buffer].wait_period);
-			sleep(buffer[items_in_buffer].wait_period);
-			printf("%d\n", buffer[items_in_buffer].consumption_num);
-			printf("Consumer has removed an item.\n");
+			if(items_in_buffer > 0){
+				//we take an item out of the buffer
+				items_in_buffer--;
+				printf("Consumer is working for %d seconds to consume.\n", buffer[items_in_buffer].wait_period);
+				sleep(buffer[items_in_buffer].wait_period);
+				printf("%d\n", buffer[items_in_buffer].consumption_num);
+				printf("Consumer has removed an item.\n");
+			}
 			//we release the mutex lock
 			printf("Consumer has released mutex lock.\n\n");
 			pthread_mutex_unlock(&lock);
@@ -99,27 +94,36 @@ void* consumer_thread()
 
 void* producer_thread()
 {
+	int rest_time;
 	while(true){
 		if(items_in_buffer < MAX_ITEMS){
 			//we get the mutex lock
 			pthread_mutex_lock(&lock);
+			rest_time = 0;
 			printf("Producer has mutex lock.\n");
-			//we put an item into the buffer
-			buffer[items_in_buffer].consumption_num = 7;
-			buffer[items_in_buffer].wait_period = 8;
-			items_in_buffer++;
-			printf("Producer has created an item.\n");
+			if(items_in_buffer < MAX_ITEMS){
+				//we put an item into the buffer
+				buffer[items_in_buffer].consumption_num = random_range(1, 50);
+				buffer[items_in_buffer].wait_period = random_range(3, 7);
+				items_in_buffer++;
+				printf("Producer has created an item.\n");
+				rest_time = random_range(3, 7);
+				printf("Producer is about to rest for %d seconds.\n", rest_time);
+			}
 			//we release the mutex lock
 			printf("Producer has released mutex lock.\n\n");
 			pthread_mutex_unlock(&lock);
-			sleep(5);
+			sleep(rest_time);
 		}
 	}
 }
 
 int random_range(int min_val, int max_val)
 {
-	unsigned int output;
+	if(min_val > max_val)
+		return -1;
+
+	int output;
 	unsigned int eax;
 	unsigned int ebx;
 	unsigned int ecx;
@@ -134,7 +138,6 @@ int random_range(int min_val, int max_val)
 	                     : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
 	                     : "a"(eax)
 	                     );
-	
 	if(ecx & 0x40000000){
 		//use rdrand
 	__asm__ __volatile__(
@@ -147,6 +150,6 @@ int random_range(int min_val, int max_val)
 	}
 
 	//get random number in the range requested 
-	output = abs(output) % (max_val + 1 - min_val) + min_val;
+	output = (abs(output) % (max_val + 1 - min_val)) + min_val;
 	return output;
 }
