@@ -10,48 +10,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 #define MAX_ITEMS 32
-
-void* consumer_thread();
-void* producer_thread();
 
 struct item {
 	int consumption_num;
 	int wait_period;
 };
 
+//global variable(s)
+struct item buffer[MAX_ITEMS];
+int items_in_buffer = 0;
+
+//function prototype(s)
+void* consumer_thread();
+void* producer_thread();
+
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; //create a mutex lock
 
 int main(int argc, char **argv)
 {
-	//we create a buffer that holds up to 32 items
-	struct item buffer[MAX_ITEMS];
-	int items_in_buffer = 0;
-
-	//lets put some items in the buffer.
-	for(int i = 0; i < 5; i++) {
-		if(items_in_buffer < MAX_ITEMS) {
-			buffer[items_in_buffer].consumption_num = items_in_buffer;
-			buffer[items_in_buffer].wait_period = items_in_buffer;
-			items_in_buffer++;
-		}
-	}
-
-	//lets take some items out of the buffer.
-	while(items_in_buffer > 0) {
-		items_in_buffer--;
-		printf("%d\n",buffer[items_in_buffer].consumption_num);
-		printf("%d\n",buffer[items_in_buffer].wait_period);
-	}
-	
 	//create a producer and consumer thread	
-	printf("I am making threads\n");
-	pthread_t pro_t;
-	pthread_create( &pro_t, NULL, producer_thread, NULL); 
-
-	pthread_t con_t;
+	pthread_t pro_t, con_t;
+	pthread_create( &pro_t, NULL, producer_thread, NULL);
+	sleep(1); 
 	pthread_create( &con_t, NULL, consumer_thread, NULL); 
-	
+	printf("Made producer and consumer threads.\n");
+
 	//join threads
  	pthread_join(pro_t, NULL);
  	pthread_join(con_t, NULL);
@@ -86,9 +71,25 @@ int main(int argc, char **argv)
 void* consumer_thread()
 {
 	printf("I am a consumer_thread\n");
+	
+	//lets take some items out of the buffer.
+	while(items_in_buffer > 0) {
+		items_in_buffer--;
+		printf("%d\n",buffer[items_in_buffer].consumption_num);
+		printf("%d\n",buffer[items_in_buffer].wait_period);
+	}
 }
 
 void* producer_thread()
 {
 	printf("I am a producer_thread\n");
+	
+	//lets put some items in the buffer.
+	for(int i = 0; i < 5; i++) {
+		if(items_in_buffer < MAX_ITEMS) {
+			buffer[items_in_buffer].consumption_num = items_in_buffer;
+			buffer[items_in_buffer].wait_period = items_in_buffer;
+			items_in_buffer++;
+		}
+	}
 }
