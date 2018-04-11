@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 void spawn_threads()
 {
 	//create five producer and five consumer threads	
-	printf("Creating five producer and five consumer threads.\n\n");
+	printf("\nCreating five producer and five consumer threads.\n\n");
 	pthread_t pro_thrd1, pro_thrd2, pro_thrd3, pro_thrd4, pro_thrd5;
 	pthread_t con_thrd1, con_thrd2, con_thrd3, con_thrd4, con_thrd5;
 	pthread_create( &pro_thrd1, NULL, producer_thread, NULL);
@@ -118,9 +118,9 @@ void* consumer_thread()
  *  
  *  The producer waits for the buffer to contain less than the max number of
  *  items that the buffer can hold and then attempts to get the mutex lock before 
- *  once more checking the buffer. It then produces an item in the buffer.
- *  After producing an item the producer rests for three to seven seconds
- *  before attempting to produce another item. Once this thread has produced
+ *  once more checking the buffer. It then produces an item in the buffer,
+ *  after which the producer rests for three to seven seconds before attempting 
+ *  to produce another item. Once this thread has produced
  *  an item or the buffer is full the producer releases the mutex lock.
  */
 void* producer_thread()
