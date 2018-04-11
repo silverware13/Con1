@@ -29,14 +29,16 @@ int main(int argc, char **argv)
 	int items_in_buffer = 0;
 
 	//lets put some items in the buffer.
-	if(items_in_buffer < MAX_ITEMS) {
-		buffer[items_in_buffer].consumption_num = 5;
-		buffer[items_in_buffer].wait_period = 5;
-		items_in_buffer++;
+	for(int i = 0; i < 5; i++) {
+		if(items_in_buffer < MAX_ITEMS) {
+			buffer[items_in_buffer].consumption_num = items_in_buffer;
+			buffer[items_in_buffer].wait_period = items_in_buffer;
+			items_in_buffer++;
+		}
 	}
 
 	//lets take some items out of the buffer.
-	if(items_in_buffer > 0) {
+	while(items_in_buffer > 0) {
 		items_in_buffer--;
 		printf("%d\n",buffer[items_in_buffer].consumption_num);
 		printf("%d\n",buffer[items_in_buffer].wait_period);
