@@ -4,7 +4,6 @@
 // Name: Zachary Thomas
 // Email: thomasza@oregonstate.edu
 // Date: 4/09/2018
-//
 
 #include "mt19937ar.h"
 #include <stdio.h>
@@ -48,6 +47,11 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+/* Function: spawn_threads
+ * -----------------------
+ *  Spawns five producer and five consumer threads, then waits for threads to finish execution
+ *  and join. Since these threads will run forever, we expect to block here indefinitely.
+ */
 void spawn_threads()
 {
 	//create five producer and five consumer threads	
@@ -78,39 +82,56 @@ void spawn_threads()
  	pthread_join(con_thrd5, NULL);
 }
 
+/* Function: consumer_thread
+ * -------------------------
+ *  This function is called by a new consumer thread when it is created.
+ *  
+ *  The consumer waits for the buffer to contain at least one item and then 
+ *  attempts to get the mutex lock before once more checking the buffer.
+ *  It then consumes the newest item in the buffer which causes it to display 
+ *  a number. Consuming an item takes a number of seconds specified by the item. 
+ *  Once this thread has consumed an item or there is not any items
+ *  in the buffer it releases the mutex lock.
+ */
 void* consumer_thread()
 {
 	while(true){
 		if(items_in_buffer > 0){
-			//we get the mutex lock
 			pthread_mutex_lock(&lock);
 			printf("Consumer has mutex lock.\n");
 			if(items_in_buffer > 0){
-				//we take an item out of the buffer
 				items_in_buffer--;
 				printf("Consumer is working for %d seconds to consume.\n", buffer[items_in_buffer].wait_period);
 				sleep(buffer[items_in_buffer].wait_period);
 				printf("%d\n", buffer[items_in_buffer].consumption_num);
 				printf("Consumer has removed an item.\n");
 			}
-			//we release the mutex lock
 			printf("Consumer has released mutex lock.\n\n");
 			pthread_mutex_unlock(&lock);
 		}
 	}
 }
 
+/* Function: producer_thread
+ * -------------------------
+ *  This function is called by a new producer thread when it is created.
+ *  
+ *  The producer waits for the buffer to contain less than the max number of
+ *  items that the buffer can hold and then attempts to get the mutex lock before 
+ *  once more checking the buffer. It then produces an item in the buffer.
+ *  After producing an item the producer rests for three to seven seconds
+ *  before attempting to produce another item. Once this thread has produced
+ *  an item or the buffer is full the producer releases the mutex lock.
+ */
 void* producer_thread()
 {
 	int rest_time;
 	while(true){
 		if(items_in_buffer < MAX_ITEMS){
-			//we get the mutex lock
 			pthread_mutex_lock(&lock);
 			rest_time = 0;
 			printf("Producer has mutex lock.\n");
 			if(items_in_buffer < MAX_ITEMS){
-				//we put an item into the buffer
 				buffer[items_in_buffer].consumption_num = random_range(1, 50);
 				buffer[items_in_buffer].wait_period = random_range(3, 7);
 				items_in_buffer++;
@@ -118,7 +139,6 @@ void* producer_thread()
 				rest_time = random_range(3, 7);
 				printf("Producer is about to rest for %d seconds.\n", rest_time);
 			}
-			//we release the mutex lock
 			printf("Producer has released mutex lock.\n\n");
 			pthread_mutex_unlock(&lock);
 			sleep(rest_time);
@@ -126,6 +146,18 @@ void* producer_thread()
 	}
 }
 
+/* Function: random_range
+ * ----------------------
+ *  This function finds a random number between a min and max value (inclusive).
+ *  The random value is created using rdrand x86 ASM on systems that support it,
+ *  and it uses Mersenne Twister on systems that do not support rdrand.
+ *
+ *  min_val: The lowest possible random number.
+ *  max_val: The highest possible random number.
+ *
+ *  returns: A random number in the given range. In the case that min_val is
+ *  	     greater than max_val this function returns -1.
+ */
 int random_range(int min_val, int max_val)
 {
 	if(min_val > max_val)
