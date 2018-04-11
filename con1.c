@@ -36,7 +36,6 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char **argv)
 {
-	
 	//seed random number generation
 	init_genrand(time(NULL));
 	
@@ -51,23 +50,32 @@ int main(int argc, char **argv)
 
 void spawn_threads()
 {
-	//create three producer and three consumer threads	
-	printf("Creating three producer and three consumer threads.\n\n");
-	pthread_t pro_t1, pro_t2, pro_t3, con_t1, con_t2, con_t3;
-	pthread_create( &pro_t1, NULL, producer_thread, NULL);
-	pthread_create( &pro_t2, NULL, producer_thread, NULL);
-	pthread_create( &pro_t3, NULL, producer_thread, NULL);
-	pthread_create( &con_t1, NULL, consumer_thread, NULL); 
-	pthread_create( &con_t2, NULL, consumer_thread, NULL); 
-	pthread_create( &con_t3, NULL, consumer_thread, NULL); 
+	//create five producer and five consumer threads	
+	printf("Creating five producer and five consumer threads.\n\n");
+	pthread_t pro_thrd1, pro_thrd2, pro_thrd3, pro_thrd4, pro_thrd5;
+	pthread_t con_thrd1, con_thrd2, con_thrd3, con_thrd4, con_thrd5;
+	pthread_create( &pro_thrd1, NULL, producer_thread, NULL);
+	pthread_create( &pro_thrd2, NULL, producer_thread, NULL);
+	pthread_create( &pro_thrd3, NULL, producer_thread, NULL);
+	pthread_create( &pro_thrd4, NULL, producer_thread, NULL);
+	pthread_create( &pro_thrd5, NULL, producer_thread, NULL);
+	pthread_create( &con_thrd1, NULL, consumer_thread, NULL); 
+	pthread_create( &con_thrd2, NULL, consumer_thread, NULL); 
+	pthread_create( &con_thrd3, NULL, consumer_thread, NULL); 
+	pthread_create( &con_thrd4, NULL, consumer_thread, NULL); 
+	pthread_create( &con_thrd5, NULL, consumer_thread, NULL); 
 	
 	//join threads (this should never finish)
- 	pthread_join(pro_t1, NULL);
- 	pthread_join(pro_t2, NULL);
- 	pthread_join(pro_t3, NULL);
- 	pthread_join(con_t1, NULL);
- 	pthread_join(con_t2, NULL);
- 	pthread_join(con_t3, NULL);
+ 	pthread_join(pro_thrd1, NULL);
+ 	pthread_join(pro_thrd2, NULL);
+ 	pthread_join(pro_thrd3, NULL);
+ 	pthread_join(pro_thrd4, NULL);
+ 	pthread_join(pro_thrd5, NULL);
+ 	pthread_join(con_thrd1, NULL);
+ 	pthread_join(con_thrd2, NULL);
+ 	pthread_join(con_thrd3, NULL);
+ 	pthread_join(con_thrd4, NULL);
+ 	pthread_join(con_thrd5, NULL);
 }
 
 void* consumer_thread()
