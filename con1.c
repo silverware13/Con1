@@ -64,7 +64,7 @@ void* consumer_thread()
 		if(items_in_buffer > 0) {
 			//we get the mutex lock
 			pthread_mutex_lock(&lock);
-			printf("Consomer has mutex lock.\n");
+			printf("Consumer has mutex lock.\n");
 			//we take an item out of the buffer
 			items_in_buffer--;
 			printf("Consumer is working for %d seconds.\n", buffer[items_in_buffer].wait_period);
@@ -72,7 +72,7 @@ void* consumer_thread()
 			printf("%d\n", buffer[items_in_buffer].consumption_num);
 			printf("Consumer has removed an item.\n");
 			//we release the mutex lock
-			printf("Consomer has released mutex lock.\n\n");
+			printf("Consumer has released mutex lock.\n\n");
 			pthread_mutex_unlock(&lock);
 		}
 	}
@@ -93,7 +93,6 @@ void* producer_thread()
 			//we release the mutex lock
 			printf("Producer has released mutex lock.\n\n");
 			pthread_mutex_unlock(&lock);
-			printf("Producer is waiting for %d seconds.\n\n", 5);
 			sleep(5);
 		}
 	}
