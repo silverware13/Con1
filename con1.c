@@ -6,13 +6,13 @@
 // Date: 4/09/2018
 //
 
+#include "mt19937ar.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "mt19937ar.h"
 #define MAX_ITEMS 32
 
 //stuct for items that threads produce and consume
@@ -37,20 +37,20 @@ int main(int argc, char **argv)
 {
 	
 	//seed random number generation
-	init_genrand(time(0));
+	init_genrand(time(NULL));
 
 	//print some random numbers:
 	int test = random_range(0, 0);
 	printf("Random number: %d\n", test);
-	test = random_range(0, 0);
+	test = random_range(1, 2);
 	printf("Random number: %d\n", test);
-	test = random_range(0, 0);
+	test = random_range(10, 20);
 	printf("Random number: %d\n", test);
-	test = random_range(0, 0);
+	test = random_range(30, 40);
 	printf("Random number: %d\n", test);
-	test = random_range(0, 0);
+	test = random_range(5, 6);
 	printf("Random number: %d\n", test);
-	test = random_range(0, 0);
+	test = random_range(5, 10);
 	printf("Random number: %d\n", test);
 	
 	//create multiple producer and consumer threads	
@@ -146,5 +146,7 @@ int random_range(int min_val, int max_val)
 		output = genrand_int32();
 	}
 
+	//get random number in the range requested 
+	output = abs(output) % (max_val + 1 - min_val) + min_val;
 	return output;
 }
