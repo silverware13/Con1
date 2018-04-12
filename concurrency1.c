@@ -49,8 +49,9 @@ int main(int argc, char **argv)
 
 /* Function: spawn_threads
  * -----------------------
- *  Spawns five producer and five consumer threads, then waits for threads to finish execution
- *  and join. Since these threads will run forever, we expect to block here indefinitely.
+ *  Spawns five producer and five consumer threads, then waits for threads to
+ *  finish execution and join. Since these threads will run forever, we expect
+ *  to block here indefinitely.
  */
 void spawn_threads()
 {
@@ -117,10 +118,10 @@ void* consumer_thread()
  *  This function is called by a new producer thread when it is created.
  *  
  *  The producer waits for the buffer to contain less than the max number of
- *  items that the buffer can hold and then attempts to get the mutex lock before 
- *  once more checking the buffer. It then produces an item in the buffer,
- *  after which the producer rests for three to seven seconds before attempting 
- *  to produce another item. Once this thread has produced
+ *  items that the buffer can hold and then attempts to get the mutex lock 
+ *  before once more checking the buffer. It then produces an item in the
+ *  buffer, after which the producer rests for three to seven seconds before
+ *  attempting to produce another item. Once this thread has produced
  *  an item or the buffer is full the producer releases the mutex lock.
  */
 void* producer_thread()
