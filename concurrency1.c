@@ -181,14 +181,12 @@ int random_range(int min_val, int max_val)
 	                     );
 	if(ecx & 0x40000000){
 		//use rdrand
-		printf("rdrand\n");
 	__asm__ __volatile__(
 	                     "rdrand %0"
                              : "=r"(output)
 	                     );
 	} else {
 		//use mt19937
-		printf("MT19937\n");
 		output = genrand_int32();
 	}
 
