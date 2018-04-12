@@ -52,7 +52,7 @@ int main(int argc, char **argv)
  *  Spawns five producer and five consumer threads, then waits for threads to
  *  finish execution and join. Since these threads will run forever, we expect
  *  to block here indefinitely.
- */
+ /
 void spawn_threads()
 {
 	//create five producer and five consumer threads	
@@ -134,7 +134,7 @@ void* producer_thread()
 			printf("Producer has mutex lock.\n");
 			if(items_in_buffer < MAX_ITEMS){
 				buffer[items_in_buffer].consumption_num = random_range(1, 50);
-				buffer[items_in_buffer].wait_period = random_range(3, 7);
+				buffer[items_in_buffer].wait_period = random_range(2, 9);
 				items_in_buffer++;
 				printf("Producer has created an item.\n");
 				rest_time = random_range(3, 7);
@@ -181,12 +181,14 @@ int random_range(int min_val, int max_val)
 	                     );
 	if(ecx & 0x40000000){
 		//use rdrand
+		printf("rdrand\n");
 	__asm__ __volatile__(
 	                     "rdrand %0"
-                             :"=r" (output)
+                             : "=r"(output)
 	                     );
 	} else {
 		//use mt19937
+		printf("MT19937\n");
 		output = genrand_int32();
 	}
 
