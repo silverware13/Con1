@@ -52,7 +52,7 @@ int main(int argc, char **argv)
  *  Spawns five producer and five consumer threads, then waits for threads to
  *  finish execution and join. Since these threads will run forever, we expect
  *  to block here indefinitely.
- /
+ */
 void spawn_threads()
 {
 	//create five producer and five consumer threads	
