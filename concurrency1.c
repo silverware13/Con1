@@ -5,6 +5,7 @@
 // Email: thomasza@oregonstate.edu
 // Date: 4/09/2018
 
+#define MAX_ITEMS 32
 #include "mt19937ar.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,6 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
-#define MAX_ITEMS 32
 
 //struct for items that threads produce and consume
 struct item {
@@ -57,30 +57,29 @@ void spawn_threads()
 {
 	//create five producer and five consumer threads	
 	printf("\nCreating five producer and five consumer threads.\n\n");
-	pthread_t pro_thrd1, pro_thrd2, pro_thrd3, pro_thrd4, pro_thrd5;
-	pthread_t con_thrd1, con_thrd2, con_thrd3, con_thrd4, con_thrd5;
-	pthread_create( &pro_thrd1, NULL, producer_thread, NULL);
-	pthread_create( &pro_thrd2, NULL, consumer_thread, NULL); 
-	pthread_create( &pro_thrd3, NULL, consumer_thread, NULL); 
-	pthread_create( &pro_thrd4, NULL, consumer_thread, NULL); 
-	pthread_create( &pro_thrd5, NULL, consumer_thread, NULL); 
-	pthread_create( &con_thrd1, NULL, consumer_thread, NULL); 
-	pthread_create( &con_thrd2, NULL, consumer_thread, NULL); 
-	pthread_create( &con_thrd3, NULL, consumer_thread, NULL); 
-	pthread_create( &con_thrd4, NULL, consumer_thread, NULL); 
-	pthread_create( &con_thrd5, NULL, consumer_thread, NULL); 
+	pthread_t thrd0, thrd1, thrd2, thrd3, thrd4, thrd5, thrd6, thrd7, thrd8, thrd9;
+	pthread_create(&thrd0, NULL, consumer_thread, NULL); 
+	pthread_create(&thrd1, NULL, producer_thread, NULL);
+	pthread_create(&thrd2, NULL, consumer_thread, NULL); 
+	pthread_create(&thrd3, NULL, producer_thread, NULL); 
+	pthread_create(&thrd4, NULL, consumer_thread, NULL); 
+	pthread_create(&thrd5, NULL, producer_thread, NULL); 
+	pthread_create(&thrd6, NULL, consumer_thread, NULL); 
+	pthread_create(&thrd7, NULL, producer_thread, NULL); 
+	pthread_create(&thrd8, NULL, consumer_thread, NULL); 
+	pthread_create(&thrd9, NULL, producer_thread, NULL); 
 	
 	//join threads (this should never finish)
- 	pthread_join(pro_thrd1, NULL);
- 	pthread_join(pro_thrd2, NULL);
- 	pthread_join(pro_thrd3, NULL);
- 	pthread_join(pro_thrd4, NULL);
- 	pthread_join(pro_thrd5, NULL);
- 	pthread_join(con_thrd1, NULL);
- 	pthread_join(con_thrd2, NULL);
- 	pthread_join(con_thrd3, NULL);
- 	pthread_join(con_thrd4, NULL);
- 	pthread_join(con_thrd5, NULL);
+ 	pthread_join(thrd0, NULL);
+ 	pthread_join(thrd1, NULL);
+ 	pthread_join(thrd2, NULL);
+ 	pthread_join(thrd3, NULL);
+ 	pthread_join(thrd4, NULL);
+ 	pthread_join(thrd5, NULL);
+ 	pthread_join(thrd6, NULL);
+ 	pthread_join(thrd7, NULL);
+ 	pthread_join(thrd8, NULL);
+ 	pthread_join(thrd9, NULL);
 }
 
 /* Function: consumer_thread
@@ -97,21 +96,19 @@ void spawn_threads()
 void* consumer_thread()
 {
 	while(true){
+		pthread_mutex_lock(&lock);
+		printf("Consumer has mutex lock.\n");
 		if(items_in_buffer > 0){
-			pthread_mutex_lock(&lock);
-			printf("Consumer has mutex lock.\n");
-			if(items_in_buffer > 0){
-				items_in_buffer--;
-				printf("Consumer is working for %d seconds to consume.\n", buffer[items_in_buffer].wait_period);
-				sleep(buffer[items_in_buffer].wait_period);
-				printf("%d\n", buffer[items_in_buffer].consumption_num);
-				printf("Consumer has removed an item.\n");
-			}	
-			printf("Consumer has released mutex lock.\n\n");
-			printf("Buffer is holding %d items.\n\n", items_in_buffer);
-			pthread_mutex_unlock(&lock);
-			sleep(1);
-		}
+			items_in_buffer--;
+			printf("Consumer is working for %d seconds to consume.\n", buffer[items_in_buffer].wait_period);
+			sleep(buffer[items_in_buffer].wait_period);
+			printf("%d\n", buffer[items_in_buffer].consumption_num);
+			printf("Consumer has removed an item.\n");
+		}	
+		printf("Consumer has released mutex lock.\n\n");
+		printf("Buffer is holding %d items.\n\n", items_in_buffer);
+		pthread_mutex_unlock(&lock);
+		sleep(random_range(1, 10));
 	}
 }
 
@@ -129,23 +126,21 @@ void* consumer_thread()
 void* producer_thread()
 {
 	while(true){
+		pthread_mutex_lock(&lock);
+		printf("Producer has mutex lock.\n");
 		if(items_in_buffer < MAX_ITEMS){
-			pthread_mutex_lock(&lock);
-			printf("Producer has mutex lock.\n");
-			if(items_in_buffer < MAX_ITEMS){
-				int rest_time = random_range(3, 7);
-				printf("Producer is working for %d seconds to produce.\n", rest_time);
-				sleep(rest_time);
-				buffer[items_in_buffer].consumption_num = random_range(1, 50);
-				buffer[items_in_buffer].wait_period = random_range(2, 9);
-				items_in_buffer++;
-				printf("Producer has created an item.\n");
-			}
-			printf("Producer has released mutex lock.\n\n");
-			printf("Buffer is holding %d items.\n\n", items_in_buffer);
-			pthread_mutex_unlock(&lock);
-			sleep(1);
+			int rest_time = random_range(3, 7);
+			printf("Producer is working for %d seconds to produce.\n", rest_time);
+			sleep(rest_time);
+			buffer[items_in_buffer].consumption_num = random_range(1, 50);
+			buffer[items_in_buffer].wait_period = random_range(2, 9);
+			items_in_buffer++;
+			printf("Producer has created an item.\n");
 		}
+		printf("Producer has released mutex lock.\n\n");
+		printf("Buffer is holding %d items.\n\n", items_in_buffer);
+		pthread_mutex_unlock(&lock);
+		sleep(random_range(1, 10));
 	}
 }
 
