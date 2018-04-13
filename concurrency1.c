@@ -1,9 +1,10 @@
-// Concurrency 1
-// CS444 Spring2018
-//
-// Name: Zachary Thomas
-// Email: thomasza@oregonstate.edu
-// Date: 4/09/2018
+/* Concurrency 1
+ * CS444 Spring2018
+ * ----------------
+ * Name: Zachary Thomas
+ * Email: thomasza@oregonstate.edu
+ * Date: 4/09/2018
+ */
 
 #define MAX_ITEMS 32
 #include "mt19937ar.h"
