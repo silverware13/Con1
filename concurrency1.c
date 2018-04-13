@@ -60,10 +60,10 @@ void spawn_threads()
 	pthread_t pro_thrd1, pro_thrd2, pro_thrd3, pro_thrd4, pro_thrd5;
 	pthread_t con_thrd1, con_thrd2, con_thrd3, con_thrd4, con_thrd5;
 	pthread_create( &pro_thrd1, NULL, producer_thread, NULL);
-	pthread_create( &pro_thrd2, NULL, producer_thread, NULL);
-	pthread_create( &pro_thrd3, NULL, producer_thread, NULL);
-	pthread_create( &pro_thrd4, NULL, producer_thread, NULL);
-	pthread_create( &pro_thrd5, NULL, producer_thread, NULL);
+	pthread_create( &pro_thrd2, NULL, consumer_thread, NULL); 
+	pthread_create( &pro_thrd3, NULL, consumer_thread, NULL); 
+	pthread_create( &pro_thrd4, NULL, consumer_thread, NULL); 
+	pthread_create( &pro_thrd5, NULL, consumer_thread, NULL); 
 	pthread_create( &con_thrd1, NULL, consumer_thread, NULL); 
 	pthread_create( &con_thrd2, NULL, consumer_thread, NULL); 
 	pthread_create( &con_thrd3, NULL, consumer_thread, NULL); 
@@ -106,9 +106,11 @@ void* consumer_thread()
 				sleep(buffer[items_in_buffer].wait_period);
 				printf("%d\n", buffer[items_in_buffer].consumption_num);
 				printf("Consumer has removed an item.\n");
-			}
+			}	
 			printf("Consumer has released mutex lock.\n\n");
+			printf("Buffer is holding %d items.\n\n", items_in_buffer);
 			pthread_mutex_unlock(&lock);
+			sleep(1);
 		}
 	}
 }
@@ -126,23 +128,23 @@ void* consumer_thread()
  */
 void* producer_thread()
 {
-	int rest_time;
 	while(true){
 		if(items_in_buffer < MAX_ITEMS){
 			pthread_mutex_lock(&lock);
-			rest_time = 0;
 			printf("Producer has mutex lock.\n");
 			if(items_in_buffer < MAX_ITEMS){
+				int rest_time = random_range(3, 7);
+				printf("Producer is working for %d seconds to produce.\n", rest_time);
+				sleep(rest_time);
 				buffer[items_in_buffer].consumption_num = random_range(1, 50);
 				buffer[items_in_buffer].wait_period = random_range(2, 9);
 				items_in_buffer++;
 				printf("Producer has created an item.\n");
-				rest_time = random_range(3, 7);
-				printf("Producer is about to rest for %d seconds.\n", rest_time);
 			}
 			printf("Producer has released mutex lock.\n\n");
+			printf("Buffer is holding %d items.\n\n", items_in_buffer);
 			pthread_mutex_unlock(&lock);
-			sleep(rest_time);
+			sleep(1);
 		}
 	}
 }
