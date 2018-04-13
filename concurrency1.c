@@ -86,11 +86,11 @@ void spawn_threads()
  * -------------------------
  *  This function is called by a new consumer thread when it is created.
  *  
- *  The consumer waits for the buffer to contain at least one item and then 
- *  attempts to get the mutex lock before once more checking the buffer.
- *  It then consumes the newest item in the buffer which causes it to display 
- *  a number. Consuming an item takes a number of seconds specified by the item. 
- *  Once this thread has consumed an item or there is not any items
+ *  The consumer attempts to get the mutex lock before checking if the 
+ *  buffer has at least one item. It then consumes the newest item in 
+ *  the buffer which causes it to display a number. Consuming an item 
+ *  takes a number of seconds specified by the item. Once this thread
+ *  has consumed an item or there is not any items
  *  in the buffer it releases the mutex lock.
  */
 void* consumer_thread()
@@ -116,11 +116,9 @@ void* consumer_thread()
  * -------------------------
  *  This function is called by a new producer thread when it is created.
  *  
- *  The producer waits for the buffer to contain less than the max number of
- *  items that the buffer can hold and then attempts to get the mutex lock 
- *  before once more checking the buffer. It then produces an item in the
- *  buffer, after which the producer rests for three to seven seconds before
- *  attempting to produce another item. Once this thread has produced
+ *  The producer attempts to get the mutex lock before checking to see 
+ *  if the buffer is full. It then produces an item in the buffer, 
+ *  which takes three to seven seconds. Once this thread has produced
  *  an item or the buffer is full the producer releases the mutex lock.
  */
 void* producer_thread()
@@ -129,9 +127,9 @@ void* producer_thread()
 		pthread_mutex_lock(&lock);
 		printf("Producer has mutex lock.\n");
 		if(items_in_buffer < MAX_ITEMS){
-			int rest_time = random_range(3, 7);
-			printf("Producer is working for %d seconds to produce.\n", rest_time);
-			sleep(rest_time);
+			int work_time = random_range(3, 7);
+			printf("Producer is working for %d seconds to produce.\n", work_time);
+			sleep(work_time);
 			buffer[items_in_buffer].consumption_num = random_range(1, 50);
 			buffer[items_in_buffer].wait_period = random_range(2, 9);
 			items_in_buffer++;
