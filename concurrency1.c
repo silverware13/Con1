@@ -4,6 +4,14 @@
  * Name: Zachary Thomas
  * Email: thomasza@oregonstate.edu
  * Date: 4/09/2018
+ * -------------------------------
+ *  This program creates five producers and 
+ *  five consumer threads. It also creates a buffer
+ *  that holds up to thirty two items. Producers 
+ *  put items into the buffer, consumers take items 
+ *  out while also displaying a number that is randomly
+ *  generated when the item is created. This program
+ *  runs indefinitely and must be manually terminated.
  */
 
 #define MAX_ITEMS 32
