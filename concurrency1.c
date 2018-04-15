@@ -5,8 +5,8 @@
  * Email: thomasza@oregonstate.edu
  * Date: 4/09/2018
  * -------------------------------
- *  This program creates five producers and 
- *  five consumer threads. It also creates a buffer
+ *  This program creates a number of producer and 
+ *  a number of consumer threads. It also creates a buffer
  *  that holds up to thirty two items. Producers 
  *  put items into the buffer, consumers take items 
  *  out while also displaying a number that is randomly
@@ -22,6 +22,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 //struct for items that threads produce and consume
 struct item {
@@ -34,7 +35,7 @@ struct item buffer[MAX_ITEMS];
 int items_in_buffer = 0;
 
 //function prototype(s)
-void spawn_threads();
+void spawn_threads(int, int);
 void* consumer_thread();
 void* producer_thread();
 int random_range(int, int);
@@ -44,11 +45,28 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char **argv)
 {
+	//first make sure the user entered num of pro and con.
+	if(argc < 2){
+		printf("%s [number of producer threads] [number of consumer threads]\n", argv[0]);
+		return 0;
+	}	
+
+	//make sure the user has entered digits.
+	if(!isdigit(*argv[1]) || !isdigit(*argv[2])){
+		printf("Please enter arguments as unsigned integers.\n");
+		return 0;
+	}	
+
+	//convert arguments to int.
+	int producers, consumers;
+	producers = strtol(argv[1], NULL, 10);	
+	consumers = strtol(argv[2], NULL, 10);
+
 	//seed random number generation
 	init_genrand(time(NULL));
 	
 	//create threads and wait for their completion
-	spawn_threads();
+	spawn_threads(producers, consumers);
 	
 	//destroy mutex lock	
 	pthread_mutex_destroy(&lock);
@@ -58,37 +76,33 @@ int main(int argc, char **argv)
 
 /* Function: spawn_threads
  * -----------------------
- *  Spawns five producer and five consumer threads, then waits for threads to
+ *  Spawns producer and consumer threads, then waits for threads to
  *  finish execution and join. Since these threads will run forever, we expect
  *  to block here indefinitely.
+ *
+ *  producers: The number of producer threads to create.
+ *  consumers: The number of consumer threads to create.
  */
-void spawn_threads()
+void spawn_threads(int producers, int consumers)
 {
-	//create five producer and five consumer threads	
-	printf("\nCreating five producer and five consumer threads.\n\n");
-	pthread_t thrd0, thrd1, thrd2, thrd3, thrd4, thrd5, thrd6, thrd7, thrd8, thrd9;
-	pthread_create(&thrd0, NULL, consumer_thread, NULL); 
-	pthread_create(&thrd1, NULL, producer_thread, NULL);
-	pthread_create(&thrd2, NULL, consumer_thread, NULL); 
-	pthread_create(&thrd3, NULL, producer_thread, NULL); 
-	pthread_create(&thrd4, NULL, consumer_thread, NULL); 
-	pthread_create(&thrd5, NULL, producer_thread, NULL); 
-	pthread_create(&thrd6, NULL, consumer_thread, NULL); 
-	pthread_create(&thrd7, NULL, producer_thread, NULL); 
-	pthread_create(&thrd8, NULL, consumer_thread, NULL); 
-	pthread_create(&thrd9, NULL, producer_thread, NULL); 
+	pthread_t thrd;
+
+	printf("\nCreating %d producer and %d consumer threads.\n\n", producers, consumers);
 	
-	//join threads (this should never finish)
- 	pthread_join(thrd0, NULL);
- 	pthread_join(thrd1, NULL);
- 	pthread_join(thrd2, NULL);
- 	pthread_join(thrd3, NULL);
- 	pthread_join(thrd4, NULL);
- 	pthread_join(thrd5, NULL);
- 	pthread_join(thrd6, NULL);
- 	pthread_join(thrd7, NULL);
- 	pthread_join(thrd8, NULL);
- 	pthread_join(thrd9, NULL);
+	while(producers || consumers){
+		if(producers){
+			pthread_create(&thrd, NULL, producer_thread, NULL);
+			producers--;
+		}
+
+		if(consumers){
+			pthread_create(&thrd, NULL, consumer_thread, NULL);
+			consumers--;
+		}
+	}
+
+	//join thread (this should never finish)
+ 	pthread_join(thrd, NULL);
 }
 
 /* Function: consumer_thread
@@ -117,7 +131,7 @@ void* consumer_thread()
 		printf("Consumer has released mutex lock.\n\n");
 		printf("Buffer is holding %d items.\n\n", items_in_buffer);
 		pthread_mutex_unlock(&lock);
-		sleep(random_range(1, 10));
+		sleep(random_range(1,2));
 	}
 }
 
@@ -147,7 +161,7 @@ void* producer_thread()
 		printf("Producer has released mutex lock.\n\n");
 		printf("Buffer is holding %d items.\n\n", items_in_buffer);
 		pthread_mutex_unlock(&lock);
-		sleep(random_range(1, 10));
+		sleep(random_range(1,2));
 	}
 }
 
