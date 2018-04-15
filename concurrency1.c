@@ -46,7 +46,7 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 int main(int argc, char **argv)
 {
 	//first make sure the user entered num of pro and con.
-	if(argc < 2){
+	if(argc < 3){
 		printf("%s [number of producer threads] [number of consumer threads]\n", argv[0]);
 		return 0;
 	}	
@@ -85,7 +85,13 @@ int main(int argc, char **argv)
  */
 void spawn_threads(int producers, int consumers)
 {
+	int some_threads;
 	pthread_t thrd;
+	
+	if(!producers && !consumers)
+		some_threads = false;
+	else
+		some_threads = true;
 
 	printf("\nCreating %d producer and %d consumer threads.\n\n", producers, consumers);
 	
@@ -102,7 +108,8 @@ void spawn_threads(int producers, int consumers)
 	}
 
 	//join thread (this should never finish)
- 	pthread_join(thrd, NULL);
+	if(some_threads)
+ 		pthread_join(thrd, NULL);
 }
 
 /* Function: consumer_thread
